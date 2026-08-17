@@ -40,7 +40,7 @@ export function ProcessingIndicator({
     <span
       aria-hidden
       className={`inline-block h-1.5 w-1.5 shrink-0 animate-pulse rounded-full ${
-        variant === "chat" ? "bg-ink-soft" : "bg-neutral-300"
+        variant === "chat" ? "bg-ink-soft" : "bg-story-ink/40"
       }`}
     />
   );
@@ -62,7 +62,7 @@ export function ProcessingIndicator({
 
   return (
     <p
-      className="flex animate-message-in items-center gap-1.5 text-xs text-neutral-400"
+      className="flex animate-message-in items-center gap-1.5 text-xs text-story-ink/60"
       role="status"
       aria-live="polite"
     >

@@ -193,8 +193,13 @@ export function StoryScreen({
             className="pointer-events-none absolute inset-0 z-0 scale-105 bg-cover bg-center blur-[1px]"
             style={{ backgroundImage: `url(${story.coverImage})` }}
           />
-          {/* 밝은 반투명 overlay — 이미지 분위기는 은은하게 남기고 본문 가독성을 우선한다. */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 z-0 bg-white/80" />
+          {/* 다크 시네마틱 스크림 — 이미지 자체를 죽이는 강한 white overlay 대신, 헤더/
+              입력창 쪽만 살짝 진하고 중간은 이미지가 드러나는 그라디언트로 가독성만
+              확보한다. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-story-bg/75 via-story-bg/30 to-story-bg/80"
+          />
         </>
       )}
 
@@ -204,36 +209,40 @@ export function StoryScreen({
           scrollContainerRef/bottomRef/overflow-y-auto/min-h-0 포함해서 전부 그대로다. */}
       <div
         className={`relative z-10 flex min-h-0 flex-1 flex-col ${
-          story.coverImage ? "" : "bg-white"
+          story.coverImage ? "" : "bg-story-bg"
         }`}
       >
-        <header className="flex items-center gap-3 border-b border-neutral-200 bg-white/90 px-3 py-3 backdrop-blur-sm">
+        <header className="flex items-center gap-3 px-3 py-3">
           <Link
             href="/story"
             aria-label="스토리 목록으로"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-neutral-600 hover:bg-neutral-100"
+            className="flex h-9 w-9 shrink-0 items-center justify-center text-xl text-story-ink/80 transition-colors hover:text-story-ink"
           >
             ‹
           </Link>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-neutral-900">{story.title}</p>
-            <p className="truncate text-xs text-neutral-500">{story.genre}</p>
+            <p className="truncate font-display text-base font-bold text-story-ink">
+              {story.title}
+            </p>
+            <p className="truncate text-xs text-story-ink/60">{story.genre}</p>
           </div>
           {currentGuestCharacter && (
             <button
               type="button"
               onClick={() => setMemoryPanelOpen(true)}
               aria-label={`${currentGuestCharacter.name}의 기억 보기`}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600 transition-colors hover:bg-violet-100"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-memory transition-colors hover:bg-white/10"
             >
               <MemoryMark className="h-5 w-5" />
             </button>
           )}
+          {/* Guest 표시는 헤더를 과밀하게 만들지 않도록 portrait+이름(또는 "＋ 초대")
+             만 남긴다 — pill 보더/배경 없이 아이콘 버튼 하나 정도의 무게로만. */}
           <button
             type="button"
             onClick={() => setGuestPanelOpen(true)}
             aria-label={currentGuestCharacter ? `게스트: ${currentGuestCharacter.name}` : "캐릭터 초대"}
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-neutral-200 py-1 pl-1 pr-2.5 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
+            className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-story-ink/80 transition-opacity hover:opacity-70"
           >
             {currentGuestCharacter ? (
               <>
@@ -241,17 +250,17 @@ export function StoryScreen({
                 <span className="max-w-[4.5rem] truncate">{currentGuestCharacter.name}</span>
               </>
             ) : (
-              <span className="px-1">＋ 초대</span>
+              <span>＋ 초대</span>
             )}
           </button>
         </header>
 
         <div
           ref={scrollContainerRef}
-          className="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4"
+          className="no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4"
         >
           {showOpeningScene && (
-            <div className="space-y-3 text-[15px] leading-7 text-neutral-800">
+            <div className="space-y-3 text-[15px] leading-8 text-story-ink">
               {openingParagraphs.map((p, i) => (
                 <p key={i} className="whitespace-pre-wrap">
                   {p}
@@ -268,28 +277,31 @@ export function StoryScreen({
           <div ref={bottomRef} />
         </div>
 
-        {error && <p className="px-4 pb-1 text-xs text-rose-500">{error}</p>}
+        {error && <p className="px-4 pb-1 text-xs text-red-400">{error}</p>}
 
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="flex items-center gap-2 border-t border-neutral-200 bg-white/90 px-3 py-3 backdrop-blur-sm"
+          className="flex items-center gap-2 px-4 py-3"
         >
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="행동이나 대사를 입력하세요..."
+            placeholder="무엇을 할까요?"
             disabled={sending}
-            className="flex-1 rounded-full border border-neutral-300 px-4 py-2 text-sm outline-none focus:border-neutral-400"
+            className="flex-1 border-b border-story-ink/25 bg-transparent px-1 py-2 text-sm text-story-ink outline-none transition-colors placeholder:text-story-ink/40 focus:border-story-ink"
           />
           <button
             type="submit"
             disabled={sending || !input.trim()}
-            className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
+            aria-label="전송"
+            className={`flex h-9 w-9 shrink-0 items-center justify-center text-xl transition-colors ${
+              input.trim() && !sending ? "text-story-ink" : "text-story-ink/30"
+            }`}
           >
-            전송
+            ↑
           </button>
         </form>
       </div>

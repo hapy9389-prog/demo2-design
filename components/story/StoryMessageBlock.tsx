@@ -8,7 +8,7 @@ import { StoryMessage } from "@/types/story";
 export function StoryMessageBlock({ message }: { message: StoryMessage }) {
   if (message.role === "user") {
     return (
-      <p className="animate-message-in border-l-2 border-neutral-300 pl-3 text-sm italic text-neutral-500">
+      <p className="animate-message-in border-l-2 border-story-ink/25 pl-3 text-sm italic text-story-ink/70">
         {message.content}
       </p>
     );
@@ -19,8 +19,11 @@ export function StoryMessageBlock({ message }: { message: StoryMessage }) {
     .map((p) => p.trim())
     .filter(Boolean);
 
+  // leading-8(오프닝 씬과 동일 리듬)은 모바일에서 일반 응답 길이엔 너무 성글어 보여서
+  // leading-7을 유지하고, 대신 문단 사이 간격(space-y-4)을 오프닝 씬만큼 넉넉하게 줘서
+  // 프로즈 읽기 리듬은 유지하되 줄 자체는 조밀하게 둔다.
   return (
-    <div className="animate-message-in space-y-3 text-[15px] leading-7 text-neutral-800">
+    <div className="animate-message-in space-y-4 text-[15px] leading-7 text-story-ink">
       {paragraphs.map((paragraph, i) => (
         <p key={i} className="whitespace-pre-wrap">
           {paragraph}
