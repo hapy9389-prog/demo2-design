@@ -42,7 +42,7 @@ export function StoryHomeScreen({
         <h1 className="text-lg font-bold text-neutral-900">스토리</h1>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="no-scrollbar flex-1 overflow-y-auto p-4">
         {latestSession && (
           <div className="mb-5">
             <ContinueSessionCard session={latestSession} />

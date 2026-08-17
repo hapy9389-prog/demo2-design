@@ -59,27 +59,35 @@ export function HomeScreen({
         </button>
       </header>
 
-      <div className="flex-1 overflow-y-auto pb-4">
+      <div className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto pb-4">
         {spotlight && (
-          <div className="px-4 pt-6">
+          <div className="shrink-0 px-4 pt-6">
             <HomeHero pick={spotlight} onSelect={onSelect} />
           </div>
         )}
 
-        <div className="mt-8">
+        <div className="mt-8 shrink-0">
           <HomeReminderSummary reminders={reminders} onOpenReminders={onOpenReminders} />
         </div>
 
-        <p className="px-4 pb-2 pt-8 text-xs font-medium uppercase tracking-wide text-ink-soft">
+        <p className="shrink-0 px-4 pb-2 pt-8 text-xs font-medium uppercase tracking-wide text-ink-soft">
           캐릭터
         </p>
-        <div className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
+        <div className="no-scrollbar flex shrink-0 snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2">
           {rows.map((row) => (
             <CharacterCard key={row.character.id} row={row} onSelect={onSelect} />
           ))}
         </div>
 
-        <div className="mt-10">
+        {/* 콘텐츠가 프레임보다 짧을 때 남는 세로 공간을 이 spacer가 흡수해서 Story teaser가
+            화면 하단까지 자연스럽게 이어지도록 한다. teaser 자체는 flex-grow를 갖지 않고
+            항상 고정 높이(h-44 / sm:h-48)를 유지한다 — 늘어나는 건 이 보이지 않는 spacer뿐이다.
+            콘텐츠가 길어 스크롤이 필요해지면 spacer는 flex-shrink로 0에 수렴해 정상적인
+            스크롤 흐름으로 돌아간다. 다른 형제들은 shrink-0으로 고정해 spacer/teaser 때문에
+            눌리는 일이 없게 한다. */}
+        <div className="flex-1" aria-hidden="true" />
+
+        <div className="mt-10 shrink-0">
           <StoryModeEntry />
         </div>
       </div>

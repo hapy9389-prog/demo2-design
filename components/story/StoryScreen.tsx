@@ -247,7 +247,7 @@ export function StoryScreen({
 
         <div
           ref={scrollContainerRef}
-          className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4"
+          className="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4"
         >
           {showOpeningScene && (
             <div className="space-y-3 text-[15px] leading-7 text-neutral-800">

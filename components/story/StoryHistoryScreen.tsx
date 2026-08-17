@@ -21,7 +21,7 @@ export function StoryHistoryScreen({ sessions }: { sessions: StorySessionSummary
         <h1 className="text-lg font-bold text-neutral-900">내 스토리 기록</h1>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="no-scrollbar flex-1 overflow-y-auto p-4">
         {sessions.length === 0 ? (
           <p className="mt-10 text-center text-sm text-neutral-400">
             아직 플레이한 기록이 없어요.

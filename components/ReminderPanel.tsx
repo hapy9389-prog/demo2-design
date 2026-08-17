@@ -52,7 +52,7 @@ export function ReminderPanel({
             ✕
           </button>
         </div>
-        <div className="flex-1 space-y-2 overflow-y-auto p-3">
+        <div className="no-scrollbar flex-1 space-y-2 overflow-y-auto p-3">
           {reminders.length === 0 && (
             <p className="mt-6 text-center text-xs text-neutral-400">
               아직 등록된 리마인더가 없어요.

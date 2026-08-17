@@ -264,7 +264,7 @@ export function MemoryPanel({
           </div>
         </div>
 
-        <div className="flex-1 space-y-2 overflow-y-auto p-3">
+        <div className="no-scrollbar flex-1 space-y-2 overflow-y-auto p-3">
           {state.status === "loading" && (
             <p className="mt-6 text-center text-xs text-neutral-400">기억을 불러오는 중...</p>
           )}

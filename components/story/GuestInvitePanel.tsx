@@ -100,7 +100,7 @@ export function GuestInvitePanel({
             </p>
           </div>
         ) : (
-          <div className="flex-1 space-y-1.5 overflow-y-auto p-3">
+          <div className="no-scrollbar flex-1 space-y-1.5 overflow-y-auto p-3">
             {CHARACTERS.map((character) => (
               <button
                 key={character.id}

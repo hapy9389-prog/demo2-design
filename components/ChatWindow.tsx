@@ -113,7 +113,7 @@ export function ChatWindow({
         onOpenMemory={onOpenMemory}
       />
 
-      <div className="flex-1 space-y-3 overflow-y-auto px-3 py-4">
+      <div className="no-scrollbar flex-1 space-y-3 overflow-y-auto px-3 py-4">
         {timeline.length === 0 && (
           <p className="mt-10 text-center text-sm text-neutral-400">
             {character.emoji} {character.name}에게 말을 걸어보세요.
