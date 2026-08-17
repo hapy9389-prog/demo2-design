@@ -308,11 +308,7 @@ export function ChatApp() {
         />
 
         {memorySheetOpen && (
-          <MemoryPanel
-            characterId={activeCharacterId}
-            characterName={activeCharacter.name}
-            onClose={() => setMemorySheetOpen(false)}
-          />
+          <MemoryPanel character={activeCharacter} onClose={() => setMemorySheetOpen(false)} />
         )}
 
         {toast && <NewMessageToast text={toast} />}

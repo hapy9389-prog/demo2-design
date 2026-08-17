@@ -302,11 +302,7 @@ export function StoryScreen({
       />
 
       {memoryPanelOpen && currentGuestCharacter && (
-        <MemoryPanel
-          characterId={currentGuestCharacter.id}
-          characterName={currentGuestCharacter.name}
-          onClose={() => setMemoryPanelOpen(false)}
-        />
+        <MemoryPanel character={currentGuestCharacter} onClose={() => setMemoryPanelOpen(false)} />
       )}
     </div>
   );

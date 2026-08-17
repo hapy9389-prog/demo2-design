@@ -843,3 +843,458 @@ Chat과 Story의 의도적인 경계를 억지로 통합하지 않는다.
 **Character의 일관성, Story의 일관성, 상태의 정확성, 기능 간 경계의 명확성**
 
 을 유지하는 것이다.
+
+---
+
+# 26. UI / Design System Principle
+
+이 프로젝트는 단순한 AI chatbot UI가 아니라
+캐릭터와 관계를 형성하고 Story 경험으로 확장되는
+"Modern Character Entertainment App"을 지향한다.
+
+UI를 수정할 때 generic AI SaaS / dashboard / messenger clone처럼
+보이지 않도록 한다.
+
+현재 디자인의 핵심 원칙:
+
+- Character illustration이 UI box보다 우선한다.
+- 모든 콘텐츠를 동일한 rounded card 안에 넣지 않는다.
+- border / shadow / gradient를 장식 목적으로 남발하지 않는다.
+- layout hierarchy는 box보다 typography / spacing / illustration으로 만든다.
+- 캐릭터별 개성은 전체 UI 색을 바꾸는 방식이 아니라
+  제한된 accent와 illustration을 통해 표현한다.
+- Chat Mode와 Story Mode는 같은 서비스의 visual identity를 공유하지만
+  서로 다른 경험으로 명확하게 느껴져야 한다.
+
+디자인 관련 변경에서는 기능/API/store 구조를 이유 없이 함께 수정하지 않는다.
+
+---
+
+# 27. Design Token Source of Truth
+
+현재 공통 visual token의 source of truth는:
+
+`app/globals.css`
+
+이다.
+
+주요 토큰:
+
+- `paper`
+  → Home / Chat 기본 배경
+
+- `paper-sunken`
+  → 한 단계 낮은 surface / section 구분
+
+- `ink`
+  → 기본 본문 텍스트
+
+- `ink-soft`
+  → 보조 텍스트 / timestamp / tagline
+
+- `seal`
+  → 브랜드 action / reminder / 중요한 상태 강조
+
+- `seal-soft`
+  → seal의 옅은 background tint
+
+- `memory`
+  → Shared Memory 전용 visual accent
+
+- `story-bg`
+  → Story Mode의 dark cinematic base
+
+- `story-ink`
+  → Story Mode의 기본 밝은 텍스트
+
+기존 token으로 표현 가능한 색을 Tailwind 기본 hue로 새로 만들지 않는다.
+
+예:
+
+피해야 할 방식:
+
+- `text-red-500`
+- `bg-purple-500`
+- `border-amber-300`
+
+이미 의미가 존재하는 경우:
+
+- `text-seal`
+- `bg-seal-soft`
+- `text-memory`
+- `bg-story-bg`
+
+를 우선 사용한다.
+
+단, error / destructive state처럼 의미가 명확히 다른 경우에는
+semantic red 계열 사용을 허용한다.
+
+---
+
+# 28. Typography
+
+현재 font source of truth는 `app/layout.tsx`와 `app/globals.css`이다.
+
+기본 UI / 본문:
+
+- Pretendard
+- `font-sans`
+
+Display:
+
+- Gowun Batang
+- `font-display`
+
+Utility:
+
+- Geist Mono
+- `font-mono`
+
+원칙:
+
+- Chat message 본문에는 display serif를 사용하지 않는다.
+- 긴 본문에는 Pretendard를 우선한다.
+- `font-display`는 Character name, Story title 등
+  제한된 emotional hierarchy 용도로만 사용한다.
+- 새로운 컴포넌트에서 Arial / Helvetica 등의 font-family를
+  직접 하드코딩하지 않는다.
+
+---
+
+# 29. Character Illustration Principle
+
+Character image의 source of truth는 `lib/characters.ts`이다.
+
+현재 Character asset은 배경 없는 PNG cutout / sticker 형태를 기준으로 한다.
+
+따라서:
+
+- Character image를 정사각 `object-cover`로 강제 crop하지 않는다.
+- 가능하면 원본 aspect ratio를 유지한다.
+- 원형 avatar가 필요한 기능적 이유가 없는 곳에서는
+  illustration을 box 안에 가두지 않는다.
+- Home / Chat에서 같은 Character가 서로 다른 사람처럼 보이지 않도록
+  동일 image source를 사용한다.
+- 새로운 캐릭터 UI를 만들 때 캐릭터별 하드코딩 이미지 경로를 만들지 않는다.
+
+Character illustration은 decoration이 아니라
+이 앱의 primary visual identity다.
+
+---
+
+# 30. Home UI Principle
+
+Home은 AI 기능 목록이나 dashboard가 아니다.
+
+사용자가 현재 관계를 이어가고 있는 Character를
+가장 먼저 인식할 수 있는 공간이어야 한다.
+
+현재 방향:
+
+1. 최근 대화 Character를 Hero로 보여준다.
+2. Character illustration을 UI보다 크게 보여준다.
+3. Character 목록은 boxed 2-column grid보다
+   horizontal character rail을 사용한다.
+4. Story Mode는 Character 영역 아래에서
+   cinematic teaser로 보여준다.
+
+피해야 할 것:
+
+- 동일한 크기의 card 반복
+- dashboard-style widget grid
+- Character마다 배경 box를 강제하는 구조
+- Story Mode가 Home의 Character 영역보다 과도하게 커지는 것
+
+Story teaser는 Home의 secondary destination이다.
+
+남는 layout 공간을 채우기 위해
+Story teaser를 `flex-grow`시켜 과도하게 확대하지 않는다.
+
+---
+
+# 31. Chat UI Principle
+
+Chat Mode는 일반적인 chatbot이나 messenger clone처럼 보이지 않아야 한다.
+
+목표는:
+
+"AI와 채팅한다"
+
+보다
+
+"이 Character와 1:1로 대화한다"
+
+는 느낌이다.
+
+현재 Chat UI의 핵심 구성:
+
+- `components/ChatWindow.tsx`
+- `components/ChatHeader.tsx`
+- `components/MessageBubble.tsx`
+- `components/ReminderSystemCard.tsx`
+- `components/ProcessingIndicator.tsx`
+
+Chat UI를 수정할 때 위 파일의 책임을 유지한다.
+
+---
+
+# 32. Chat Header
+
+Chat Header는 Home에서 본 Character가
+자연스럽게 대화 화면까지 이어진다는 느낌을 준다.
+
+현재 원칙:
+
+- Character image를 원형 avatar로 강제 crop하지 않는다.
+- 원본 PNG illustration 비율을 유지한다.
+- Character name은 주요 hierarchy다.
+- Character tagline은 secondary information이다.
+- Memory와 Reminder는 별도의 action이다.
+
+Memory:
+
+`memory` visual token
+
+Reminder:
+
+`seal` visual token
+
+을 사용한다.
+
+캐릭터별로 Header 전체 색상을 하드코딩하지 않는다.
+
+캐릭터별 차이는 기존 accent configuration을 통해 표현한다.
+
+---
+
+# 33. Chat Message Language
+
+현재 Chat Message의 visual hierarchy는 의도적이다.
+
+## User Message
+
+사용자가 보낸 메시지는:
+
+- 오른쪽 정렬
+- `seal-soft` background
+- rounded message shape
+
+를 사용한다.
+
+User message를 강한 `seal` solid background로 바꾸지 않는다.
+대화가 쌓였을 때 브랜드 색이 화면 전체를 지배하지 않게 하기 위함이다.
+
+## Character Message
+
+Character message는 일반적인 filled bubble을 사용하지 않는다.
+
+현재:
+
+- paper background 위 text
+- Character accent의 얇은 left rule
+
+을 이용해 Character의 말을 표현한다.
+
+이 구조는 의도적으로
+"AI chatbot bubble" 느낌을 줄이기 위한 것이다.
+
+모든 Character message를 white rounded card로 감싸지 않는다.
+
+---
+
+# 34. Reminder Message Visual Rule
+
+Reminder / proactive message는
+일반 Chat response와 의미가 다르다.
+
+사용자가 지금 질문해서 받은 응답이 아니라
+Character가 먼저 말을 건 event이기 때문이다.
+
+따라서 다음 차이를 유지한다.
+
+- `"먼저 말을 걸었어요"` 등의 indicator
+- `seal` 의미색
+- 일반 message보다 조금 강한 entrance animation
+
+하지만:
+
+- 지나치게 큰 system card
+- modal 수준의 interruption
+- 과도한 flashing animation
+
+은 사용하지 않는다.
+
+Reminder가 특별하다는 것은 보여주되
+대화 흐름 자체를 깨지 않는다.
+
+---
+
+# 35. Chat Input Principle
+
+Chat input은 일반적인 AI prompt box처럼 보이지 않도록 한다.
+
+현재 방향:
+
+- 과도하게 큰 rounded textarea를 사용하지 않는다.
+- 입력창 background를 별도 card처럼 띄우지 않는다.
+- underline / minimal surface 방식 유지
+- Send action만 작은 visual emphasis를 준다.
+
+Character Chat은 command interface가 아니라 conversation interface다.
+
+따라서:
+
+- magic wand
+- AI sparkle
+- model selector
+- prompt icon
+
+같은 generic AI UI 요소를 불필요하게 추가하지 않는다.
+
+---
+
+# 36. Scroll UI
+
+phone frame 내부의 scroll container에서는
+브라우저 scrollbar UI를 노출하지 않는다.
+
+공통 source:
+
+`app/globals.css`
+
+`.no-scrollbar`
+
+를 사용한다.
+
+중요:
+
+scrollbar를 숨기는 것은
+scroll 기능을 제거하는 것이 아니다.
+
+다음은 유지해야 한다.
+
+- `overflow-y-auto`
+- `overflow-x-auto`
+- mouse wheel
+- trackpad
+- touch scroll
+- scroll ref
+- auto scroll behavior
+
+scrollbar를 숨기기 위해 `overflow-hidden`으로 바꾸지 않는다.
+
+---
+
+# 37. Animation Principle
+
+Animation은 상태 변화의 의미를 전달할 때만 사용한다.
+
+현재 주요 animation:
+
+- message entrance
+- proactive reminder message 강조
+- bell ring
+- phone shake
+- sheet up
+
+source of truth:
+
+`app/globals.css`
+
+새 animation을 만들기 전에 기존 animation을 재사용할 수 있는지 확인한다.
+
+피해야 할 것:
+
+- 모든 hover에 scale
+- 모든 card에 floating animation
+- 장식 목적의 무한 animation
+- excessive bounce
+- 지나친 glass / blur animation
+
+`prefers-reduced-motion` 대응을 유지한다.
+
+---
+
+# 38. UI Refactoring Safety
+
+UI 리디자인은 기존 기능 변경과 분리한다.
+
+디자인 작업 시 특별한 이유가 없다면 다음 파일을 수정하지 않는다.
+
+- API route
+- store
+- scheduler
+- reminder guard
+- time calculation
+- memory extraction
+- Story prompt
+- Character prompt
+
+UI 변경 과정에서 기존 handler / props / ref를
+단순히 디자인상 필요 없어 보인다는 이유로 제거하지 않는다.
+
+특히 다음 기능 연결을 보존한다.
+
+- Home → Chat navigation
+- Chat message auto-scroll
+- Reminder polling
+- Reminder panel
+- Memory panel
+- Story session
+- Guest invitation
+- Story scroll tracking
+
+UI 작업 후에는 visual 확인뿐 아니라
+기존 interaction이 유지되는지 확인한다.
+
+---
+
+# 39. Incremental Design Development
+
+전체 UI를 한 번에 리디자인하지 않는다.
+
+현재 권장 순서:
+
+Home
+→ Chat
+→ Memory / Reminder Panels
+→ Story
+→ Guest Invite
+→ 전체 visual consistency review
+
+각 단계에서:
+
+1. 기존 화면 분석
+2. 수정 범위 결정
+3. UI만 구현
+4. 브라우저에서 직접 확인
+5. 문제 수정
+6. 다음 화면으로 이동
+
+을 따른다.
+
+이미 완료된 Home / Chat의 visual language를
+다음 화면에서 임의로 새로 정의하지 않는다.
+
+기존 Design Token과 Character Illustration language를
+우선 재사용한다.
+
+---
+
+# 40. Design Review Checklist
+
+UI 변경 후 최소한 다음을 확인한다.
+
+- Character illustration이 잘리지 않는가?
+- Character asset의 aspect ratio가 유지되는가?
+- 동일한 rounded card가 반복되고 있지 않은가?
+- border / shadow가 과도하지 않은가?
+- Tailwind 기본 accent color를 의미 없이 추가하지 않았는가?
+- typography hierarchy가 명확한가?
+- Chat과 Story가 같은 앱처럼 보이면서도 다른 경험인가?
+- scrollbar UI가 phone frame 안에 노출되지 않는가?
+- 좁은 mobile width에서 text가 잘리지 않는가?
+- Character rail의 이름 / 상태가 보이는가?
+- Story teaser가 Home의 핵심 Character UI를 침범하지 않는가?
+- reminder / memory action이 기존대로 동작하는가?
+- API / store / state logic에 불필요한 변경이 없는가?

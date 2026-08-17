@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MemoryListItem } from "@/types";
+import { Character, MemoryListItem } from "@/types";
 
 type LoadState =
   | { status: "loading" }
@@ -17,10 +17,12 @@ const SOURCE_LABEL: Record<"chat" | "story" | "manual", string> = {
 const MANUAL_MEMORY_MAX_LENGTH = 300;
 
 /**
- * 클릭 가능한 별 5개. 기존 카드의 importance 변경(PATCH)과 추가 폼의 importance
- * 선택(로컬 state) 양쪽에서 재사용한다. n번째 별 클릭 -> onRate(n).
+ * 클릭 가능한 dot 5개("이 기억이 얼마나 선명한지"). 기존 항목의 importance 변경(PATCH)과
+ * 추가 폼의 importance 선택(로컬 state) 양쪽에서 재사용한다. n번째 dot 클릭 -> onRate(n).
+ * 이전 StarPicker와 동일한 button 기반 상호작용(네이티브 키보드 포커스/Enter·Space 활성화)을
+ * 그대로 유지하고, 각 단계에 aria-label과 focus-visible 링만 추가했다.
  */
-function StarPicker({
+function MemoryVividnessDots({
   value,
   onRate,
   disabled,
@@ -30,17 +32,25 @@ function StarPicker({
   disabled?: boolean;
 }) {
   return (
-    <span className="inline-flex gap-0.5">
+    <span
+      className="inline-flex items-center gap-1"
+      role="group"
+      aria-label={`이 기억의 선명도, 5단계 중 ${value}단계`}
+    >
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
           type="button"
           disabled={disabled}
-          aria-label={`중요도 ${n}`}
+          aria-label={`선명도 ${n}단계로 표시`}
+          aria-pressed={n <= value}
           onClick={() => onRate(n)}
-          className="leading-none text-amber-400 disabled:opacity-40"
+          className="rounded-full p-0.5 leading-none outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-memory focus-visible:ring-offset-1 focus-visible:ring-offset-paper disabled:opacity-40"
         >
-          {n <= value ? "★" : "☆"}
+          <span
+            aria-hidden
+            className={`block h-1.5 w-1.5 rounded-full ${n <= value ? "bg-memory" : "bg-paper-sunken"}`}
+          />
         </button>
       ))}
     </span>
@@ -70,12 +80,10 @@ function formatMemoryDate(date: Date): string {
  * ChatApp의 3초 폴링에는 포함되지 않는다(Memory는 실시간 알림 데이터가 아님).
  */
 export function MemoryPanel({
-  characterId,
-  characterName,
+  character,
   onClose,
 }: {
-  characterId: string;
-  characterName: string;
+  character: Character;
   onClose: () => void;
 }) {
   // 초기 상태 자체가 "loading"이므로 마운트 시점에 별도로 setState할 필요가 없다
@@ -100,9 +108,14 @@ export function MemoryPanel({
   const [addSubmitting, setAddSubmitting] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
 
+  // 헤더/empty state의 box-less 캐릭터 초상용. ChatHeader.tsx/CharacterCard.tsx와 동일한
+  // 이유로 Avatar(원형 크롭 전제)를 쓰지 않고 이 컴포넌트 전용 로컬 폴백을 둔다.
+  const [imageFailed, setImageFailed] = useState(false);
+  const showImage = Boolean(character.image) && !imageFailed;
+
   const runFetch = useCallback(() => {
     const myToken = ++requestTokenRef.current;
-    fetch(`/api/memories?characterId=${encodeURIComponent(characterId)}`)
+    fetch(`/api/memories?characterId=${encodeURIComponent(character.id)}`)
       .then(async (res) => {
         const data = await res.json();
         if (requestTokenRef.current !== myToken) return; // stale 응답 무시
@@ -116,7 +129,7 @@ export function MemoryPanel({
         if (requestTokenRef.current !== myToken) return;
         setState({ status: "error", message: "기억을 불러오지 못했습니다." });
       });
-  }, [characterId]);
+  }, [character.id]);
 
   useEffect(() => {
     runFetch();
@@ -127,7 +140,7 @@ export function MemoryPanel({
     return () => {
       tokenRef.current++;
     };
-  }, [characterId, runFetch]);
+  }, [character.id, runFetch]);
 
   // 재시도 버튼: effect 밖(클릭 이벤트 핸들러)에서 호출되므로 동기 setState가 허용된다.
   const handleRetry = useCallback(() => {
@@ -151,7 +164,7 @@ export function MemoryPanel({
         const res = await fetch(`/api/memories/${memoryId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ characterId, importance }),
+          body: JSON.stringify({ characterId: character.id, importance }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || "중요도를 변경하지 못했습니다.");
@@ -162,7 +175,7 @@ export function MemoryPanel({
         setMutatingId(null);
       }
     },
-    [characterId, runFetch]
+    [character.id, runFetch]
   );
 
   const handleDeleteClick = useCallback((memoryId: string) => {
@@ -182,7 +195,7 @@ export function MemoryPanel({
         const res = await fetch(`/api/memories/${memoryId}`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ characterId }),
+          body: JSON.stringify({ characterId: character.id }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || "기억을 삭제하지 못했습니다.");
@@ -194,7 +207,7 @@ export function MemoryPanel({
         setMutatingId(null);
       }
     },
-    [characterId, runFetch]
+    [character.id, runFetch]
   );
 
   const handleAddSubmit = useCallback(async () => {
@@ -209,7 +222,7 @@ export function MemoryPanel({
       const res = await fetch("/api/memories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ characterId, content: trimmed, importance: addImportance }),
+        body: JSON.stringify({ characterId: character.id, content: trimmed, importance: addImportance }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "기억을 추가하지 못했습니다.");
@@ -222,7 +235,7 @@ export function MemoryPanel({
     } finally {
       setAddSubmitting(false);
     }
-  }, [addContent, addImportance, characterId, runFetch]);
+  }, [addContent, addImportance, character.id, runFetch]);
 
   const handleAddCancel = useCallback(() => {
     setShowAddForm(false);
@@ -238,15 +251,30 @@ export function MemoryPanel({
         onClick={onClose}
         className="absolute inset-0 animate-fade-in bg-black/30"
       />
-      <div className="relative z-10 flex max-h-[70%] animate-sheet-up flex-col rounded-t-3xl bg-white shadow-2xl">
-        <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-neutral-200" />
-        <div className="flex items-start justify-between border-b border-violet-100 bg-violet-50/40 px-4 py-3">
-          <div>
-            <h2 className="text-sm font-semibold text-violet-700">
-              🧠 {characterName}의 기억
+      <div className="relative z-10 flex max-h-[70%] animate-sheet-up flex-col rounded-t-3xl bg-paper shadow-2xl">
+        <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-paper-sunken" />
+        <div className="flex items-center gap-3 border-b border-paper-sunken bg-paper px-4 py-3">
+          {showImage ? (
+            // ChatHeader.tsx와 동일한 box-less 캐릭터 초상 — 원형 크롭 없이 원본 비율.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={character.image}
+              alt=""
+              aria-hidden
+              className="h-10 w-auto shrink-0 drop-shadow-[0_3px_6px_rgba(43,36,32,0.18)]"
+              onError={() => setImageFailed(true)}
+            />
+          ) : (
+            <span className="shrink-0 text-2xl leading-none" aria-hidden>
+              {character.emoji}
+            </span>
+          )}
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate font-display text-sm font-bold text-ink">
+              {character.name}의 기억
             </h2>
-            <p className="mt-0.5 text-xs text-violet-600/70">
-              {characterName}가 기억하고 있는 중요한 내용이에요.
+            <p className="mt-0.5 truncate text-xs text-memory">
+              {character.name}가 기억하고 있는 중요한 내용이에요.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-3">
@@ -254,11 +282,11 @@ export function MemoryPanel({
               onClick={handleRefresh}
               aria-label="새로고침"
               title="새로고침"
-              className="text-neutral-400 hover:text-neutral-600"
+              className="text-ink-soft hover:text-ink"
             >
               ↻
             </button>
-            <button onClick={onClose} aria-label="닫기" className="text-neutral-400 hover:text-neutral-600">
+            <button onClick={onClose} aria-label="닫기" className="text-ink-soft hover:text-ink">
               ✕
             </button>
           </div>
@@ -266,7 +294,7 @@ export function MemoryPanel({
 
         <div className="no-scrollbar flex-1 space-y-2 overflow-y-auto p-3">
           {state.status === "loading" && (
-            <p className="mt-6 text-center text-xs text-neutral-400">기억을 불러오는 중...</p>
+            <p className="mt-6 text-center text-xs text-ink-soft">기억을 불러오는 중...</p>
           )}
 
           {state.status === "error" && (
@@ -274,7 +302,7 @@ export function MemoryPanel({
               <p className="text-red-500">{state.message}</p>
               <button
                 onClick={handleRetry}
-                className="mt-2 font-medium text-violet-600 hover:text-violet-800"
+                className="mt-2 font-medium text-memory hover:opacity-70"
               >
                 다시 시도
               </button>
@@ -290,81 +318,98 @@ export function MemoryPanel({
               )}
 
               {state.memories.length === 0 && !showAddForm && (
-                <p className="mt-6 text-center text-xs leading-relaxed text-neutral-400">
-                  아직 특별히 기억하고 있는 내용이 없어요.
-                  <br />
-                  <br />
-                  대화를 나누거나 함께 Story를 경험하면
-                  <br />
-                  중요한 기억이 이곳에 쌓입니다.
-                </p>
+                <div className="mt-6 flex flex-col items-center gap-3 text-center">
+                  {showImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={character.image}
+                      alt=""
+                      aria-hidden
+                      className="h-24 w-auto opacity-80 drop-shadow-[0_8px_10px_rgba(43,36,32,0.15)]"
+                      onError={() => setImageFailed(true)}
+                    />
+                  ) : (
+                    <span className="text-5xl opacity-80" aria-hidden>
+                      {character.emoji}
+                    </span>
+                  )}
+                  <p className="text-xs leading-relaxed text-ink-soft">
+                    아직 {character.name}가 특별히 기억해둔 게 없어요.
+                    <br />
+                    대화를 나누거나 함께 Story를 경험하면
+                    <br />
+                    중요한 기억이 이곳에 쌓입니다.
+                  </p>
+                </div>
               )}
 
-              {state.memories.map((m) => {
-                const isMutating = mutatingId === m.id;
-                const isConfirming = confirmingDeleteId === m.id;
-                return (
-                  <div
-                    key={m.id}
-                    className="animate-message-in rounded-xl border border-neutral-200 p-3 text-xs"
-                  >
-                    <p className="text-neutral-800">{m.content}</p>
+              {state.memories.length > 0 && (
+                <div className="divide-y divide-paper-sunken">
+                  {state.memories.map((m) => {
+                    const isMutating = mutatingId === m.id;
+                    const isConfirming = confirmingDeleteId === m.id;
+                    return (
+                      <div key={m.id} className="animate-message-in py-3 text-xs">
+                        <p className="leading-relaxed text-ink">{m.content}</p>
 
-                    {isConfirming ? (
-                      <div className="mt-1.5 flex items-center justify-between text-neutral-500">
-                        <span>정말 삭제할까요?</span>
-                        <span className="flex gap-2">
-                          <button
-                            onClick={handleDeleteCancel}
-                            disabled={isMutating}
-                            className="font-medium text-neutral-500 hover:text-neutral-700 disabled:opacity-40"
-                          >
-                            취소
-                          </button>
-                          <button
-                            onClick={() => handleDeleteConfirm(m.id)}
-                            disabled={isMutating}
-                            className="font-medium text-red-500 hover:text-red-700 disabled:opacity-40"
-                          >
-                            {isMutating ? "삭제 중..." : "삭제"}
-                          </button>
-                        </span>
+                        {isConfirming ? (
+                          <div className="mt-1.5 flex items-center justify-between text-ink-soft">
+                            <span>정말 삭제할까요?</span>
+                            <span className="flex gap-2">
+                              <button
+                                onClick={handleDeleteCancel}
+                                disabled={isMutating}
+                                className="font-medium text-ink-soft hover:text-ink disabled:opacity-40"
+                              >
+                                취소
+                              </button>
+                              <button
+                                onClick={() => handleDeleteConfirm(m.id)}
+                                disabled={isMutating}
+                                className="font-medium text-red-500 hover:text-red-700 disabled:opacity-40"
+                              >
+                                {isMutating ? "삭제 중..." : "삭제"}
+                              </button>
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="mt-1.5 flex items-center justify-between gap-2">
+                            <span className="flex flex-wrap items-center gap-1.5 text-ink-soft">
+                              {SOURCE_LABEL[m.source.type]} ·{" "}
+                              {formatMemoryDate(new Date(m.updatedAt))} 갱신
+                              <MemoryVividnessDots
+                                value={m.importance}
+                                disabled={isMutating}
+                                onRate={(n) => handleRate(m.id, n)}
+                              />
+                            </span>
+                            <button
+                              onClick={() => handleDeleteClick(m.id)}
+                              disabled={isMutating}
+                              className="shrink-0 font-medium text-ink-soft hover:text-red-500 disabled:opacity-40"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="mt-1.5 flex items-center justify-between">
-                        <span className="text-neutral-400">
-                          {SOURCE_LABEL[m.source.type]} ·{" "}
-                          <StarPicker
-                            value={m.importance}
-                            disabled={isMutating}
-                            onRate={(n) => handleRate(m.id, n)}
-                          />
-                        </span>
-                        <button
-                          onClick={() => handleDeleteClick(m.id)}
-                          disabled={isMutating}
-                          className="font-medium text-red-500 hover:text-red-700 disabled:opacity-40"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    )}
-
-                    <p className="mt-0.5 text-neutral-400">
-                      {formatMemoryDate(new Date(m.updatedAt))} 갱신
-                    </p>
-                  </div>
-                );
-              })}
+                    );
+                  })}
+                </div>
+              )}
 
               {state.memories.length > 0 && (
-                <p className="pt-1 text-center text-[11px] text-neutral-400">
+                <p className="pt-1 text-center text-[11px] text-ink-soft">
                   총 {state.memories.length}개의 기억
                 </p>
               )}
 
               {showAddForm ? (
-                <div className="animate-message-in rounded-xl border border-violet-200 bg-violet-50/30 p-3 text-xs">
+                // 입력 폼이 펼쳐진 상태에서만 옅은 memory surface를 준다 — 실제로 뭔가를
+                // 적어 넣는 활성 입력 영역이라 최소한의 경계가 필요하기 때문이다. 닫힌
+                // 상태(아래 else 분기)는 또 하나의 박스 카드처럼 보이지 않도록 순수 텍스트
+                // 버튼으로만 둔다.
+                <div className="animate-message-in rounded-xl border border-memory/20 bg-memory/5 p-3 text-xs">
                   <textarea
                     value={addContent}
                     onChange={(e) => setAddContent(e.target.value)}
@@ -372,13 +417,18 @@ export function MemoryPanel({
                     rows={3}
                     placeholder="기억할 내용을 적어주세요"
                     disabled={addSubmitting}
-                    className="w-full resize-none rounded-lg border border-neutral-300 px-2.5 py-2 text-xs outline-none focus:border-violet-400 disabled:opacity-60"
+                    className="w-full resize-none rounded-lg border border-paper-sunken bg-paper px-2.5 py-2 text-xs text-ink outline-none focus:border-memory disabled:opacity-60"
                   />
                   <div className="mt-1.5 flex items-center justify-between">
-                    <span className="text-neutral-400">
-                      중요도 <StarPicker value={addImportance} disabled={addSubmitting} onRate={setAddImportance} />
+                    <span className="flex items-center gap-1.5 text-ink-soft">
+                      선명도{" "}
+                      <MemoryVividnessDots
+                        value={addImportance}
+                        disabled={addSubmitting}
+                        onRate={setAddImportance}
+                      />
                     </span>
-                    <span className="text-[11px] text-neutral-400">
+                    <span className="text-[11px] text-ink-soft">
                       {addContent.length}/{MANUAL_MEMORY_MAX_LENGTH}
                     </span>
                   </div>
@@ -387,14 +437,14 @@ export function MemoryPanel({
                     <button
                       onClick={handleAddCancel}
                       disabled={addSubmitting}
-                      className="font-medium text-neutral-500 hover:text-neutral-700 disabled:opacity-40"
+                      className="font-medium text-ink-soft hover:text-ink disabled:opacity-40"
                     >
                       취소
                     </button>
                     <button
                       onClick={handleAddSubmit}
                       disabled={addSubmitting}
-                      className="font-medium text-violet-600 hover:text-violet-800 disabled:opacity-40"
+                      className="font-medium text-memory hover:opacity-70 disabled:opacity-40"
                     >
                       {addSubmitting ? "추가 중..." : "추가"}
                     </button>
@@ -403,9 +453,9 @@ export function MemoryPanel({
               ) : (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="w-full rounded-xl border border-dashed border-violet-200 py-2.5 text-xs font-medium text-violet-600 hover:bg-violet-50/50"
+                  className="w-full py-2 text-center text-xs font-medium text-memory transition-opacity hover:opacity-70"
                 >
-                  + 기억 추가
+                  + 직접 기억 남기기
                 </button>
               )}
             </>
