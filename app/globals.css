@@ -36,6 +36,16 @@
    *  살짝 예고하고, Story 화면 본체 리디자인은 다음 단계에서 진행한다. */
   --story-bg: #17130f;
   --story-ink: #efe4d2;
+  /** Story Lobby(StoryHomeScreen/StoryHistoryScreen) 전용 바탕. 밝은 warm beige →
+   *  dark warm brown을 차례로 시도했으나 brown/beige 기가 Story cover(밤/눈/학교의
+   *  blue-navy 계열)와 색온도가 충돌해서 cool charcoal/blue-gray로 정착했다 —
+   *  Story 진행 화면의 --story-bg(완전한 dark, 그것도 사실 warm 계열)보다 한 단
+   *  밝으면서도 이번엔 계열 자체가 다른 cool한 dark surface로 둬서 "Home/Chat
+   *  (밝음) → Lobby(cool dark) → Story 진행(deeper warm dark)"으로 이어진다.
+   *  --paper를 재정의하지 않고 별도 토큰으로 둬서 Home/Chat/Memory/Reminder는
+   *  전혀 영향받지 않는다. */
+  --story-lobby-bg: #1c2026;
+  --story-lobby-sunken: #292f37;
 }
 
 @theme inline {
@@ -51,6 +61,8 @@
   --color-memory: var(--memory);
   --color-story-bg: var(--story-bg);
   --color-story-ink: var(--story-ink);
+  --color-story-lobby-bg: var(--story-lobby-bg);
+  --color-story-lobby-sunken: var(--story-lobby-sunken);
 
   /* UI/본문 기본 서체는 Pretendard(app/layout.tsx에서 next/font/local로 self-host).
      제목 전용 세리프는 Gowun Batang — 캐릭터 이름 네임플레이트, 섹션 헤드라인처럼

@@ -12,15 +12,15 @@ export function StoryHistoryList({ sessions }: { sessions: StorySessionSummary[]
   if (sessions.length === 0) return null;
 
   return (
-    <div className="divide-y divide-paper-sunken">
+    <div className="divide-y divide-white/8">
       {sessions.map((session) => (
         <Link
           key={session.sessionId}
           href={`/story/${session.storyId}?sessionId=${session.sessionId}`}
           className="flex items-center justify-between gap-3 py-2.5 transition-opacity hover:opacity-70"
         >
-          <p className="truncate text-sm font-medium text-ink">{session.storyTitle}</p>
-          <p className="shrink-0 text-xs text-ink-soft">
+          <p className="truncate text-sm font-medium text-story-ink">{session.storyTitle}</p>
+          <p className="shrink-0 text-xs text-white/55">
             {formatRelativeKorean(session.updatedAt)} · {session.messageCount}개 메시지
           </p>
         </Link>

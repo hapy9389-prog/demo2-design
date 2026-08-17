@@ -30,16 +30,16 @@ export function StoryHomeScreen({
   const previewSessions = restSessions.slice(0, HISTORY_PREVIEW_COUNT);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-paper">
-      <header className="flex items-center gap-3 border-b border-paper-sunken px-4 py-4">
+    <div className="flex min-h-0 flex-1 flex-col bg-story-lobby-bg">
+      <header className="flex items-center gap-3 border-b border-white/8 px-4 py-4">
         <Link
           href="/"
           aria-label="채팅 모드로 돌아가기"
-          className="flex h-9 w-9 shrink-0 items-center justify-center text-xl text-ink-soft transition-colors hover:text-ink"
+          className="flex h-9 w-9 shrink-0 items-center justify-center text-xl text-white/55 transition-colors hover:text-story-ink"
         >
           ‹
         </Link>
-        <h1 className="text-lg font-bold text-ink">스토리</h1>
+        <h1 className="text-lg font-bold text-story-ink">스토리</h1>
       </header>
 
       <div className="no-scrollbar flex-1 overflow-y-auto p-4">
@@ -52,7 +52,7 @@ export function StoryHomeScreen({
         {/* 세 섹션의 위계: Continue(위, 가장 큼) → Discover(중간, 라벨을 좀 더 힘있게)
            → History(가장 조용함). 한글에는 uppercase가 아무 시각 효과가 없어서 대신
            크기/굵기로 구분한다. */}
-        <p className="pb-2 text-sm font-semibold text-ink">새로운 Story 시작</p>
+        <p className="pb-2 text-sm font-semibold text-story-ink">새로운 Story 시작</p>
         <div className="mb-6 grid grid-cols-2 gap-3">
           {stories.map((story) => (
             <StoryCard key={story.id} story={story} />
@@ -62,10 +62,10 @@ export function StoryHomeScreen({
         {restSessions.length > 0 && (
           <div>
             <div className="flex items-center justify-between pb-2">
-              <p className="text-sm font-medium text-ink-soft">내 스토리 기록</p>
+              <p className="text-sm font-medium text-white/55">내 스토리 기록</p>
               <Link
                 href="/story/history"
-                className="text-xs font-medium text-ink-soft hover:text-ink"
+                className="text-xs font-medium text-white/55 hover:text-story-ink"
               >
                 전체 기록 보기 ›
               </Link>

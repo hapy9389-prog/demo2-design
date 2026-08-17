@@ -9,21 +9,21 @@ import { StoryHistoryList } from "./StoryHistoryList";
  */
 export function StoryHistoryScreen({ sessions }: { sessions: StorySessionSummary[] }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-paper">
-      <header className="flex items-center gap-3 border-b border-paper-sunken px-4 py-4">
+    <div className="flex min-h-0 flex-1 flex-col bg-story-lobby-bg">
+      <header className="flex items-center gap-3 border-b border-white/8 px-4 py-4">
         <Link
           href="/story"
           aria-label="스토리 홈으로"
-          className="flex h-9 w-9 shrink-0 items-center justify-center text-xl text-ink-soft transition-colors hover:text-ink"
+          className="flex h-9 w-9 shrink-0 items-center justify-center text-xl text-white/55 transition-colors hover:text-story-ink"
         >
           ‹
         </Link>
-        <h1 className="text-lg font-bold text-ink">내 스토리 기록</h1>
+        <h1 className="text-lg font-bold text-story-ink">내 스토리 기록</h1>
       </header>
 
       <div className="no-scrollbar flex-1 overflow-y-auto p-4">
         {sessions.length === 0 ? (
-          <p className="mt-10 text-center text-sm text-ink-soft">
+          <p className="mt-10 text-center text-sm text-white/55">
             아직 플레이한 기록이 없어요.
           </p>
         ) : (
