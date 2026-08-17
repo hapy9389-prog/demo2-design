@@ -32,7 +32,7 @@ export function HomeReminderSummary({
         <button
           key={r.id}
           onClick={onOpenReminders}
-          className="flex w-full items-center gap-2 rounded-2xl border border-amber-100 bg-amber-50/70 px-3 py-2 text-left text-xs text-amber-800 transition-colors hover:bg-amber-100"
+          className="flex w-full items-center gap-2 rounded-2xl bg-seal-soft px-3 py-2 text-left text-xs text-seal transition-opacity hover:opacity-80"
         >
           <span className="shrink-0 text-base leading-none">🔔</span>
           <span className="min-w-0 flex-1 truncate">
@@ -40,14 +40,14 @@ export function HomeReminderSummary({
               {r.characterEmoji} {r.characterName}
             </span>
             <span className="ml-1.5">{formatReminderTime(new Date(r.triggerAt))}</span>
-            <span className="ml-1.5 text-amber-700/80">· {r.content}</span>
+            <span className="ml-1.5 text-seal/80">· {r.content}</span>
           </span>
         </button>
       ))}
       {remaining > 0 && (
         <button
           onClick={onOpenReminders}
-          className="w-full rounded-xl px-3 py-1 text-center text-xs font-medium text-amber-700 hover:text-amber-800"
+          className="w-full rounded-xl px-3 py-1 text-center text-xs font-medium text-seal hover:opacity-80"
         >
           +{remaining}개 더보기
         </button>
