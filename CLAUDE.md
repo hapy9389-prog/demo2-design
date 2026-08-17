@@ -1298,3 +1298,249 @@ UI 변경 후 최소한 다음을 확인한다.
 - Story teaser가 Home의 핵심 Character UI를 침범하지 않는가?
 - reminder / memory action이 기존대로 동작하는가?
 - API / store / state logic에 불필요한 변경이 없는가?
+
+---
+
+# 41. Memory UI Final Principle
+
+Memory UI는 단순한 CRUD 목록이 아니라
+"Character가 사용자에 대해 기억하고 있는 것"처럼 느껴져야 한다.
+
+현재 방향:
+
+- visual accent는 `memory` token을 사용한다.
+- 기본 아이콘은 `MemoryMark`를 사용한다.
+- `🧠` emoji를 기본 Memory 아이콘으로 되돌리지 않는다.
+- Memory item은 rounded card 반복보다 flowing list + divider를 사용한다.
+- importance는 별점이 아니라 vividness dot 방식으로 표현한다.
+- Character illustration + 이름으로 "누구의 기억인지" 보여준다.
+- delete action은 평소 low emphasis로 두고, destructive 순간에만 red를 사용한다.
+- Memory header는 과한 보라색 surface보다 subtle tint / watermark / glow 정도만 사용한다.
+
+MemoryMark는 "기억의 흔적 / 울림"을 표현하는 공통 visual glyph다.
+
+---
+
+# 42. Reminder UI Final Principle
+
+Reminder UI는 일반 alarm / task manager가 아니라
+"Character와 한 약속" 또는
+"앞으로 Character가 먼저 건넬 말"처럼 느껴져야 한다.
+
+현재 방향:
+
+- visual accent는 `seal` token을 사용한다.
+- 기본 아이콘은 `ReminderMark`를 사용한다.
+- `🔔` emoji를 기본 Reminder 아이콘으로 남발하지 않는다.
+- ReminderPanel은 시간 중심의 agenda layout을 사용한다.
+- 시간 정보가 content보다 먼저 인식될 수 있도록 hierarchy를 유지한다.
+- pending / fired / failed 상태는 과도한 badge보다
+  typography / opacity / subtle state 표현으로 구분한다.
+- proactive reminder message는 일반 Chat response보다 조금 더 특별하게 보이되
+  대화 흐름을 깨지 않는다.
+
+ReminderMark는 "정해진 미래의 한 순간 / 약속"을 표현하는 공통 visual glyph다.
+
+---
+
+# 43. Story Lobby Visual Principle
+
+Story Lobby는 일반 콘텐츠 목록이 아니라
+"다른 세계로 들어가기 전의 cinematic library"처럼 보여야 한다.
+
+현재 Story Lobby의 visual direction:
+
+- 전체 배경은 warm beige / brown이 아니라
+  cool charcoal / subtle blue-gray 계열을 사용한다.
+- 관련 token은 `story-lobby-bg`, `story-lobby-sunken`이다.
+- Continue Session은 일반 card가 아니라 cinematic Hero로 표현한다.
+- 새로운 Story는 poster-style cover 중심으로 보여준다.
+- Story History는 compact flowing list + divider를 사용한다.
+- Story cover image 위에 과도한 white overlay를 씌우지 않는다.
+- neon / game launcher HUD / glassmorphism 남발을 피한다.
+
+Story Lobby는 다음 transition의 중간 단계다.
+
+Home / Chat
+→ 밝은 paper surface
+
+Story Lobby
+→ cool dark cinematic lobby
+
+Story 진행 화면
+→ deeper dark cinematic world
+
+---
+
+# 44. Story Screen Visual Principle
+
+Story 진행 화면은 Chat 화면과 명확히 다른
+interactive fiction / visual novel experience를 지향한다.
+
+현재 방향:
+
+- cover image를 atmospheric background로 적극 활용한다.
+- white wash 대신 dark scrim으로 가독성을 확보한다.
+- narrator / assistant content는 일반 Chat bubble보다 prose처럼 읽히게 한다.
+- user turn은 "사용자가 선택한 행동/대사"처럼
+  italic + left rule 구조를 유지한다.
+- Story input은 generic Chat input처럼 보이지 않게 한다.
+- Guest Character는 header 또는 scene context에서 최소한으로 표시한다.
+- Guest가 있다고 해서 모든 응답에서 Guest를 UI적으로 과도하게 강조하지 않는다.
+
+Story에 실제 speaker metadata가 없는 경우
+UI에서 임의로 화자를 추측하지 않는다.
+
+---
+
+# 45. Story Scroll Policy
+
+Story는 Chat처럼 새 메시지가 생길 때마다
+무조건 bottom으로 이동시키지 않는다.
+
+원칙:
+
+- 사용자가 bottom 근처에 있으면 새 user / assistant message를 자연스럽게 따라간다.
+- 사용자가 위쪽 내용을 읽고 있으면 강제로 아래로 끌고 가지 않는다.
+- near-bottom 판단이 필요할 때 실제 scroll container의 DOM 위치를 직접 확인한다.
+- scroll event로 갱신되는 stale ref만 믿지 않는다.
+- scroll 문제를 `overflow-hidden`, fixed height 등의 꼼수로 숨기지 않는다.
+- `scrollIntoView()` 사용 시 대상과 block 위치를 명확히 한다.
+
+현재 Story scroll 정책은 의도된 UX이므로
+Chat auto-scroll 정책과 억지로 통합하지 않는다.
+
+---
+
+# 46. Guest Invite Panel Visual Principle
+
+GuestInvitePanel은 Story 본체와 분리된 설정 layer이지만,
+색감이 Story와 완전히 끊겨 보이지 않도록 한다.
+
+현재 방향:
+
+- 기본은 밝은 paper utility sheet를 유지한다.
+- Story tone은 아주 옅은 wash / divider / hover tint에만 반영한다.
+- 완전한 dark modal로 만들지 않는다.
+- flowing list 구조를 유지한다.
+- Character 선택 목록에서는 기능적 이유로 Avatar crop을 허용한다.
+- remove action은 평소 low emphasis로 두고 destructive 순간만 red를 사용한다.
+
+---
+
+# 47. Error / Loading / Empty State
+
+현재 error 표현은 두 계열로 단순화한다.
+
+Light surface:
+- `text-red-500`
+
+Dark Story surface:
+- `text-red-400`
+
+같은 종류의 error를 화면마다 임의의 rose / amber / red 계열로 만들지 않는다.
+
+Loading state:
+
+- 불필요하게 큰 loader component를 만들지 않는다.
+- 기존 state를 이용한 조용한 text feedback을 우선한다.
+- Story 최초 로딩 시 완전한 빈 화면으로 두지 않는다.
+
+Empty state:
+
+- 단순히 "데이터 없음"이라고 표현하기보다
+  Character / Reminder / Story context를 유지한다.
+
+---
+
+# 48. Phone Frame Principle
+
+데스크톱에서는 앱이 중앙의 phone frame 안에 표시되고,
+모바일에서는 실제 앱처럼 viewport를 사용한다.
+
+현재 phone frame shell은 의도된 presentation layer다.
+
+따라서:
+
+- 단순히 legacy neutral class가 남아 있다는 이유로 제거하지 않는다.
+- phone frame을 제거해 데스크톱의 중앙 휴대폰 데모 형태를 깨뜨리지 않는다.
+- Chat과 Story의 frame 구조를 함께 고려한다.
+- frame 수정이 필요하다면 layout 구조는 유지하고 최소한의 style diff만 적용한다.
+
+---
+
+# 49. Responsive / Overflow Principle
+
+모바일 환경에서 horizontal overflow가 발생하지 않도록 한다.
+
+특히 다음을 확인한다.
+
+- 긴 Character name
+- 긴 tagline
+- 긴 Chat message
+- 공백 없는 긴 문자열
+- 긴 Story title
+- 긴 Story response
+- 많은 Memory / Reminder
+- Guest UI
+
+Story background처럼 의도적으로 scale된 요소는
+부모 안에서 안전하게 clip되어야 하며
+문서 전체의 horizontal scroll을 만들면 안 된다.
+
+phone frame 내부 scroll container는 `.no-scrollbar`를 사용하되
+실제 scrolling 기능은 유지한다.
+
+---
+
+# 50. UI Regression Validation
+
+중요한 UI 변경 후 최소한 다음을 확인한다.
+
+Static check:
+
+- `npx tsc --noEmit`
+- `npx eslint .`
+
+주요 사용자 흐름:
+
+1. Home → Character Chat
+2. Chat message 송수신
+3. Reminder 생성
+4. Reminder proactive 발화
+5. ReminderPanel 조회 / 삭제
+6. MemoryPanel 조회 / importance 변경 / 추가 / 삭제
+7. Story Lobby → 새 Story 시작
+8. Story 이어하기
+9. Story message 진행
+10. Guest Character 초대 / 제거
+11. Guest Shared Memory
+12. Story History
+13. StorySessionMissing
+14. loading / error / empty state
+15. mobile overflow / scroll / long text
+
+UI 작업은 visual 확인만으로 끝내지 않고
+기존 interaction과 주요 흐름이 유지되는지도 확인한다.
+
+---
+
+# 51. Final Product Experience
+
+이 프로젝트의 핵심 경험은 기능이 각각 따로 존재하는 것이 아니라
+Character와 사용자의 관계가 여러 모드를 통해 이어지는 것이다.
+
+핵심 연결:
+
+Chat
+→ Time Awareness
+→ Reminder
+→ Shared Memory
+→ Story
+→ Guest Character
+→ Shared Memory
+→ 다시 Chat
+
+새 기능이나 디자인을 추가할 때
+독립적인 gimmick을 하나 더 만드는 것보다
+이 관계의 연속성을 강화하는지를 먼저 판단한다.
