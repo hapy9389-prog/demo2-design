@@ -36,7 +36,7 @@ export function ChatHeader({
       <button
         onClick={onBack}
         aria-label="뒤로가기"
-        className="flex h-9 w-9 shrink-0 items-center justify-center text-2xl text-ink-soft transition-colors hover:text-ink"
+        className="flex h-9 w-9 shrink-0 items-center justify-center text-xl text-ink-soft transition-colors hover:text-ink"
       >
         ‹
       </button>

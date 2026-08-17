@@ -234,7 +234,7 @@ export function StoryScreen({
           <Link
             href="/story"
             aria-label="스토리 목록으로"
-            className="flex h-9 w-9 shrink-0 items-center justify-center text-xl text-story-ink/80 transition-colors hover:text-story-ink"
+            className="flex h-9 w-9 shrink-0 items-center justify-center text-xl text-white/55 transition-colors hover:text-story-ink"
           >
             ‹
           </Link>
@@ -277,6 +277,9 @@ export function StoryScreen({
           ref={scrollContainerRef}
           className="no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4"
         >
+          {!loaded && (
+            <p className="pt-10 text-center text-xs text-story-ink/60">이야기를 불러오는 중...</p>
+          )}
           {showOpeningScene && (
             <div className="space-y-3 text-[15px] leading-8 text-story-ink">
               {openingParagraphs.map((p, i) => (

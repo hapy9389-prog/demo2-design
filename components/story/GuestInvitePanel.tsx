@@ -84,7 +84,7 @@ export function GuestInvitePanel({
             <button
               onClick={onClose}
               aria-label="닫기"
-              className="text-ink-soft hover:text-ink"
+              className="shrink-0 text-ink-soft transition-colors hover:text-ink"
             >
               ✕
             </button>
