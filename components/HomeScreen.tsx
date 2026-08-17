@@ -6,6 +6,7 @@ import { StoryModeEntry } from "./StoryModeEntry";
 import { CharacterCard } from "./CharacterCard";
 import { HomeReminderSummary } from "./HomeReminderSummary";
 import { HomeHero } from "./HomeHero";
+import { ReminderMark } from "./ReminderMark";
 
 export type { HomeRow };
 
@@ -43,13 +44,13 @@ export function HomeScreen({
         <button
           onClick={onOpenReminders}
           aria-label="리마인더 목록 열기"
-          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-seal-soft text-lg text-seal transition-opacity hover:opacity-80"
+          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-seal-soft text-seal transition-opacity hover:opacity-80"
         >
           <span
             key={bellPulseTick}
             className={bellPulseTick > 0 ? "inline-block animate-bell-ring" : "inline-block"}
           >
-            🔔
+            <ReminderMark className="h-5 w-5" />
           </span>
           {pendingReminderCount > 0 && (
             <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-seal px-1 text-[10px] font-semibold text-white">

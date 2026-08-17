@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Character, MemoryListItem } from "@/types";
+import { MemoryMark } from "./MemoryMark";
 
 type LoadState =
   | { status: "loading" }
@@ -33,7 +34,7 @@ function MemoryVividnessDots({
 }) {
   return (
     <span
-      className="inline-flex items-center gap-1"
+      className="inline-flex items-center gap-1.5"
       role="group"
       aria-label={`이 기억의 선명도, 5단계 중 ${value}단계`}
     >
@@ -49,7 +50,9 @@ function MemoryVividnessDots({
         >
           <span
             aria-hidden
-            className={`block h-1.5 w-1.5 rounded-full ${n <= value ? "bg-memory" : "bg-paper-sunken"}`}
+            className={`block h-2 w-2 rounded-full transition-colors ${
+              n <= value ? "bg-memory" : "border border-ink-soft/30"
+            }`}
           />
         </button>
       ))}
@@ -253,42 +256,57 @@ export function MemoryPanel({
       />
       <div className="relative z-10 flex max-h-[70%] animate-sheet-up flex-col rounded-t-3xl bg-paper shadow-2xl">
         <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-paper-sunken" />
-        <div className="flex items-center gap-3 border-b border-paper-sunken bg-paper px-4 py-3">
-          {showImage ? (
-            // ChatHeader.tsx와 동일한 box-less 캐릭터 초상 — 원형 크롭 없이 원본 비율.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={character.image}
-              alt=""
-              aria-hidden
-              className="h-10 w-auto shrink-0 drop-shadow-[0_3px_6px_rgba(43,36,32,0.18)]"
-              onError={() => setImageFailed(true)}
-            />
-          ) : (
-            <span className="shrink-0 text-2xl leading-none" aria-hidden>
-              {character.emoji}
-            </span>
-          )}
-          <div className="min-w-0 flex-1">
-            <h2 className="truncate font-display text-sm font-bold text-ink">
-              {character.name}의 기억
-            </h2>
-            <p className="mt-0.5 truncate text-xs text-memory">
-              {character.name}가 기억하고 있는 중요한 내용이에요.
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-3">
-            <button
-              onClick={handleRefresh}
-              aria-label="새로고침"
-              title="새로고침"
-              className="text-ink-soft hover:text-ink"
-            >
-              ↻
-            </button>
-            <button onClick={onClose} aria-label="닫기" className="text-ink-soft hover:text-ink">
-              ✕
-            </button>
+        <div className="relative overflow-hidden border-b border-memory/15 bg-paper px-4 py-3">
+          {/* 은은한 mood 장식 2개만: 초상 뒤 옅은 glow, 모서리의 아주 옅은 워터마크.
+             둘 다 position 없는(static) 콘텐츠보다 항상 아래에 그려지므로 z-index가
+             필요 없고, 캐릭터 초상을 가리지 않는다 — opacity를 낮게, 크기를 초상보다
+             작게 유지해 시각적 우선순위가 초상을 넘지 않게 한다. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-3 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-memory/20 blur-lg"
+          />
+          <MemoryMark
+            className="pointer-events-none absolute -right-2 -top-3 h-16 w-16 text-memory opacity-[0.14]"
+          />
+
+          <div className="flex items-center gap-3">
+            {showImage ? (
+              // ChatHeader.tsx와 동일한 box-less 캐릭터 초상 — 원형 크롭 없이 원본 비율.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={character.image}
+                alt=""
+                aria-hidden
+                className="h-10 w-auto shrink-0 drop-shadow-[0_3px_6px_rgba(43,36,32,0.18)]"
+                onError={() => setImageFailed(true)}
+              />
+            ) : (
+              <span className="shrink-0 text-2xl leading-none" aria-hidden>
+                {character.emoji}
+              </span>
+            )}
+            <div className="min-w-0 flex-1">
+              <h2 className="flex items-center gap-1.5 truncate font-display text-sm font-bold text-ink">
+                <MemoryMark className="h-3.5 w-3.5 shrink-0 text-memory" />
+                {character.name}의 기억
+              </h2>
+              <p className="mt-0.5 truncate text-xs text-memory">
+                함께 나눈 이야기 중 {character.name}가 기억해둔 것들이에요.
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-3">
+              <button
+                onClick={handleRefresh}
+                aria-label="새로고침"
+                title="새로고침"
+                className="text-ink-soft hover:text-ink"
+              >
+                ↻
+              </button>
+              <button onClick={onClose} aria-label="닫기" className="text-ink-soft hover:text-ink">
+                ✕
+              </button>
+            </div>
           </div>
         </div>
 
@@ -374,22 +392,28 @@ export function MemoryPanel({
                           </div>
                         ) : (
                           <div className="mt-1.5 flex items-center justify-between gap-2">
-                            <span className="flex flex-wrap items-center gap-1.5 text-ink-soft">
-                              {SOURCE_LABEL[m.source.type]} ·{" "}
-                              {formatMemoryDate(new Date(m.updatedAt))} 갱신
+                            <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
+                              <span className="shrink-0 rounded-[3px] bg-paper-sunken px-1 py-0.5 text-[10px] font-medium text-ink-soft">
+                                {SOURCE_LABEL[m.source.type]}
+                              </span>
+                              <span className="shrink-0 text-[10px] text-ink-soft/70">
+                                {formatMemoryDate(new Date(m.updatedAt))} 갱신
+                              </span>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-3">
                               <MemoryVividnessDots
                                 value={m.importance}
                                 disabled={isMutating}
                                 onRate={(n) => handleRate(m.id, n)}
                               />
-                            </span>
-                            <button
-                              onClick={() => handleDeleteClick(m.id)}
-                              disabled={isMutating}
-                              className="shrink-0 font-medium text-ink-soft hover:text-red-500 disabled:opacity-40"
-                            >
-                              삭제
-                            </button>
+                              <button
+                                onClick={() => handleDeleteClick(m.id)}
+                                disabled={isMutating}
+                                className="text-[11px] font-medium text-ink-soft hover:text-red-500 disabled:opacity-40"
+                              >
+                                삭제
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>

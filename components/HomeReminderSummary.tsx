@@ -2,6 +2,7 @@
 
 import { formatReminderTime } from "@/lib/time";
 import { ReminderWithCharacter } from "@/types";
+import { ReminderMark } from "./ReminderMark";
 
 const MAX_VISIBLE = 2;
 
@@ -34,7 +35,7 @@ export function HomeReminderSummary({
           onClick={onOpenReminders}
           className="flex w-full items-center gap-2 rounded-2xl bg-seal-soft px-3 py-2 text-left text-xs text-seal transition-opacity hover:opacity-80"
         >
-          <span className="shrink-0 text-base leading-none">🔔</span>
+          <ReminderMark className="h-4 w-4 shrink-0 text-seal" />
           <span className="min-w-0 flex-1 truncate">
             <span className="font-semibold">
               {r.characterEmoji} {r.characterName}

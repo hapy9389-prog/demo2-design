@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { formatKoreanTime } from "@/lib/time";
 import { Character, Message } from "@/types";
 import { Avatar } from "./Avatar";
+import { ReminderMark } from "./ReminderMark";
 import { ACCENT_RULE_STYLE } from "@/lib/accentColors";
 
 /**
@@ -63,7 +64,7 @@ export function MessageBubble({
           >
             {isReminder && (
               <div className="mb-1 flex items-center gap-1 text-[11px] font-medium text-seal">
-                <span>🔔</span>
+                <ReminderMark className="h-3 w-3 shrink-0" />
                 <span>먼저 말을 걸었어요</span>
               </div>
             )}

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Character } from "@/types";
 import { ACCENT_DOT_STYLE } from "@/lib/accentColors";
+import { MemoryMark } from "./MemoryMark";
+import { ReminderMark } from "./ReminderMark";
 
 /**
  * 채팅 화면 상단 헤더: 뒤로가기 + 캐릭터 일러스트/이름/상태 문구 + 기억/리마인더 버튼.
@@ -72,20 +74,20 @@ export function ChatHeader({
       <button
         onClick={onOpenMemory}
         aria-label="기억 목록 열기"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg text-memory transition-colors hover:bg-memory/10"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-memory transition-colors hover:bg-memory/10"
       >
-        🧠
+        <MemoryMark className="h-5 w-5" />
       </button>
       <button
         onClick={onOpenReminders}
         aria-label="리마인더 목록 열기"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg text-seal transition-colors hover:bg-seal-soft"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-seal transition-colors hover:bg-seal-soft"
       >
         <span
           key={bellPulseTick}
           className={bellPulseTick > 0 ? "inline-block animate-bell-ring" : "inline-block"}
         >
-          🔔
+          <ReminderMark className="h-5 w-5" />
         </span>
       </button>
     </header>

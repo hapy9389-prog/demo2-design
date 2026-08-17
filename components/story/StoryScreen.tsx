@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar";
+import { MemoryMark } from "@/components/MemoryMark";
 import { MemoryPanel } from "@/components/MemoryPanel";
 import { ProcessingIndicator } from "@/components/ProcessingIndicator";
 import { getCharacterById } from "@/lib/characters";
@@ -223,9 +224,9 @@ export function StoryScreen({
               type="button"
               onClick={() => setMemoryPanelOpen(true)}
               aria-label={`${currentGuestCharacter.name}의 기억 보기`}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-50 text-lg text-violet-600 transition-colors hover:bg-violet-100"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600 transition-colors hover:bg-violet-100"
             >
-              🧠
+              <MemoryMark className="h-5 w-5" />
             </button>
           )}
           <button
