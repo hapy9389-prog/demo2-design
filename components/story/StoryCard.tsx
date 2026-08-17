@@ -6,16 +6,19 @@ import { Story } from "@/types/story";
 import { createAndEnterSession } from "./createAndEnterSession";
 
 /**
- * 홈 스토리 목록의 카드 한 칸. components/CharacterCard.tsx의 그리드 카드 레이아웃을
- * 참고했다. 클릭하면 항상 새 StorySession을 만들고(기존 세션 자동 재사용 안 함) 그
- * 세션으로 이동한다 — "새로운 Story 시작"의 유일한 진입점.
+ * 홈 스토리 목록의 카드 한 칸 — 포스터 형태. 흰 카드 안에 썸네일+텍스트 블록을 분리하지
+ * 않고, cover 이미지 자체가 카드의 표면이다(genre/title/description을 이미지 하단
+ * gradient 위에 직접 얹는다 — components/StoryModeEntry.tsx 티저와 같은 문법).
+ * 클릭하면 항상 새 StorySession을 만들고(기존 세션 자동 재사용 안 함) 그 세션으로
+ * 이동한다 — "새로운 Story 시작"의 유일한 진입점.
  */
 export function StoryCard({ story }: { story: Story }) {
   const router = useRouter();
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // components/Avatar.tsx와 동일한 패턴: coverImage가 지정돼 있어도 파일이 실제로
-  // 없거나 로드에 실패하면 onError로 감지해 이모지로 폴백한다.
+  // 이미지 로드 실패 시 이모지로 폴백한다 — 세션 생성 클릭 핸들러가 필요해 이 컴포넌트는
+  // 어차피 client component이므로(ContinueSessionCard.tsx와 달리 서버 컴포넌트로 뺄
+  // 이유가 없다), <img onError>를 그대로 쓴다.
   const [imageFailed, setImageFailed] = useState(false);
   const showImage = Boolean(story.coverImage) && !imageFailed;
 
@@ -37,28 +40,33 @@ export function StoryCard({ story }: { story: Story }) {
       type="button"
       onClick={handleClick}
       disabled={starting}
-      className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white text-left shadow-sm transition-transform active:scale-[0.98] disabled:opacity-60"
+      className="relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden bg-story-bg text-left transition-opacity active:opacity-90 disabled:opacity-60"
     >
-      <div className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-neutral-100 text-3xl">
-        {showImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={story.coverImage}
-            alt={story.title}
-            className="h-full w-full object-cover"
-            onError={() => setImageFailed(true)}
-          />
-        ) : (
-          <span aria-hidden>{starting ? "…" : "📖"}</span>
-        )}
-      </div>
-      <div className="flex flex-col gap-0.5 p-2.5">
-        <span className="truncate text-[11px] font-medium uppercase tracking-wide text-neutral-400">
+      {showImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={story.coverImage}
+          alt={story.title}
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <span
+          aria-hidden
+          className="absolute inset-0 flex items-center justify-center text-3xl text-story-ink/50"
+        >
+          {starting ? "…" : "📖"}
+        </span>
+      )}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-story-bg via-story-bg/15 to-transparent" />
+      <div className="relative flex flex-col gap-0.5 p-2.5">
+        <span className="truncate text-[10px] font-medium tracking-wide text-story-ink/70">
           {story.genre}
         </span>
-        <p className="truncate text-sm font-semibold text-neutral-900">{story.title}</p>
-        <p className="line-clamp-2 text-xs text-neutral-500">{story.description}</p>
-        {error && <p className="text-[11px] text-rose-500">{error}</p>}
+        <p className="truncate font-display text-sm font-bold text-story-ink">{story.title}</p>
+        {/* 선택에 필요한 최소 정보는 남긴다 — 완전히 빼지 않고 1줄로 clamp. */}
+        <p className="line-clamp-1 text-[11px] text-story-ink/60">{story.description}</p>
+        {error && <p className="text-[11px] text-red-400">{error}</p>}
       </div>
     </button>
   );
