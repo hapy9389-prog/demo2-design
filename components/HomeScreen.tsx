@@ -67,9 +67,15 @@ export function HomeScreen({
           </div>
         )}
 
-        <div className="mt-8 shrink-0">
-          <HomeReminderSummary reminders={reminders} onOpenReminders={onOpenReminders} />
-        </div>
+        {/* HomeReminderSummary는 pending 리마인더가 없으면 null을 반환한다 — 그 경우
+           이 wrapper의 mt-8까지 남아있으면 라벨의 pt-8과 겹쳐 다른 상태보다 여백이
+           두 배로 보인다. pending 유무를 여기서도 확인해 그럴 때는 wrapper 자체를
+           렌더링하지 않는다(HomeReminderSummary 내부 로직/데이터는 그대로). */}
+        {reminders.some((r) => r.status === "pending") && (
+          <div className="mt-8 shrink-0">
+            <HomeReminderSummary reminders={reminders} onOpenReminders={onOpenReminders} />
+          </div>
+        )}
 
         <p className="shrink-0 px-4 pb-2 pt-8 text-xs font-medium uppercase tracking-wide text-ink-soft">
           캐릭터
