@@ -46,7 +46,7 @@ export function Avatar({
         shape === "square" ? "rounded-none" : "rounded-full"
       } ${SIZE_CLASS[size]} ${
         showImage ? "bg-neutral-100" : ACCENT_AVATAR_STYLE[character.accent]
-      } ${emphasize ? "ring-2 ring-amber-300 ring-offset-2" : ""}`}
+      } ${emphasize ? "ring-2 ring-seal ring-offset-2 ring-offset-paper" : ""}`}
     >
       {showImage ? (
         // 파일이 없을 수도 있는 로컬 정적 경로라 next/image보다 onError 폴백을

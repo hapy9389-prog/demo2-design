@@ -40,18 +40,22 @@ export function ProcessingIndicator({
     <span
       aria-hidden
       className={`inline-block h-1.5 w-1.5 shrink-0 animate-pulse rounded-full ${
-        variant === "chat" ? "bg-neutral-400" : "bg-neutral-300"
+        variant === "chat" ? "bg-ink-soft" : "bg-neutral-300"
       }`}
     />
   );
 
   if (variant === "chat") {
+    // 캐릭터 메시지가 버블 없이 보이는 것과 같은 문법 — 상태 표시도 박스 없이
+    // 왼쪽 정렬된 텍스트 + 점 하나로만.
     return (
-      <div className="flex animate-message-in justify-start" role="status" aria-live="polite">
-        <div className="flex items-center gap-2 rounded-2xl rounded-bl-sm border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-500 shadow-sm">
-          {dot}
-          <span>{text}</span>
-        </div>
+      <div
+        className="flex animate-message-in items-center gap-2 py-0.5 pl-1 text-sm text-ink-soft"
+        role="status"
+        aria-live="polite"
+      >
+        {dot}
+        <span>{text}</span>
       </div>
     );
   }

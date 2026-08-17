@@ -6,10 +6,11 @@
 
   /*
    * "포토카드 다이어리" 디자인 토큰. 1차 적용 범위는 Home 화면
-   * (HomeScreen/CharacterCard/HomeSpotlight/StoryModeEntry/HomeReminderSummary)뿐이다.
-   * Chat 본체(ChatWindow/MessageBubble/ReminderPanel/MemoryPanel)와 Story 화면은 아직
-   * 기존 neutral/rose/amber/violet 클래스를 그대로 쓴다 — 한 번에 전체를 갈아엎지 않고
-   * 다음 단계에서 점진적으로 이 토큰으로 옮겨간다.
+   * (HomeScreen/CharacterCard/HomeSpotlight/StoryModeEntry/HomeReminderSummary)이고,
+   * 2차로 Chat 본체(ChatHeader/ChatWindow/MessageBubble/ReminderSystemCard/
+   * ProcessingIndicator/NewMessageToast)도 이 토큰으로 옮겨왔다. ReminderPanel/
+   * MemoryPanel(바텀시트)과 Story 화면은 아직 기존 neutral/rose/amber/violet 클래스를
+   * 그대로 쓴다 — 한 번에 전체를 갈아엎지 않고 다음 단계에서 점진적으로 옮겨간다.
    */
 
   /** Chat/Home 기본 바탕. "Modern Character Entertainment App" 2차 리디자인에서

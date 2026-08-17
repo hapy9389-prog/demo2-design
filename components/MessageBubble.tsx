@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { formatKoreanTime } from "@/lib/time";
 import { Character, Message } from "@/types";
 import { Avatar } from "./Avatar";
+import { ACCENT_RULE_STYLE } from "@/lib/accentColors";
 
 /**
  * "**text**"만 안전하게 <strong>으로 바꾸는 최소 parser. 전체 Markdown을 지원하지
@@ -20,7 +21,7 @@ function renderAssistantContent(text: string): ReactNode[] {
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
       return (
-        <strong key={i} className="font-semibold text-neutral-600">
+        <strong key={i} className="font-semibold text-ink">
           {part.slice(2, -2)}
         </strong>
       );
@@ -47,25 +48,29 @@ export function MessageBubble({
       }`}
     >
       {!isUser && <Avatar character={character} size="sm" emphasize={isReminder} />}
-      <div className={`flex max-w-[75%] flex-col ${isUser ? "items-end" : "items-start"}`}>
-        <div
-          className={`rounded-2xl px-4 py-2 text-sm leading-relaxed shadow-sm ${
-            isUser
-              ? "rounded-br-sm bg-rose-500 text-white"
-              : "rounded-bl-sm border border-neutral-200 bg-white text-neutral-900"
-          }`}
-        >
-          {!isUser && isReminder && (
-            <div className="mb-1 flex items-center gap-1 text-[11px] font-medium text-amber-600">
-              <span>🔔</span>
-              <span>먼저 말을 걸었어요</span>
-            </div>
-          )}
-          <p className="whitespace-pre-wrap">
-            {isUser ? message.content : renderAssistantContent(message.content)}
-          </p>
-        </div>
-        <span className="mt-1 px-1 text-[10px] text-neutral-400">{time}</span>
+      <div className={`flex max-w-[78%] flex-col ${isUser ? "items-end" : "items-start"}`}>
+        {isUser ? (
+          // 내 메시지만 옅은 pill 배경을 둔다 — "내가 보낸 말풍선"이라는 신호는 필요하지만
+          // 화면을 지배할 만큼 진하지는 않게. 캐릭터 메시지는 아래에서 버블 없이 보여준다.
+          <div className="rounded-2xl rounded-br-sm bg-seal-soft px-4 py-2 text-sm leading-relaxed text-ink">
+            <p className="whitespace-pre-wrap">{message.content}</p>
+          </div>
+        ) : (
+          // 캐릭터 메시지는 버블 박스 없이 paper 배경 위 텍스트 그대로 둔다 — 가독성이
+          // 최우선이고, 캐릭터 accent 색의 얇은 rule 하나로만 "누구의 말인지" 표시한다.
+          <div
+            className={`border-l-2 py-0.5 pl-3 text-sm leading-relaxed text-ink ${ACCENT_RULE_STYLE[character.accent]}`}
+          >
+            {isReminder && (
+              <div className="mb-1 flex items-center gap-1 text-[11px] font-medium text-seal">
+                <span>🔔</span>
+                <span>먼저 말을 걸었어요</span>
+              </div>
+            )}
+            <p className="whitespace-pre-wrap">{renderAssistantContent(message.content)}</p>
+          </div>
+        )}
+        <span className="mt-1 px-1 text-[10px] text-ink-soft">{time}</span>
       </div>
     </div>
   );

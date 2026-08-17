@@ -104,7 +104,7 @@ export function ChatWindow({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-neutral-50">
+    <div className="flex min-h-0 flex-1 flex-col bg-paper">
       <ChatHeader
         character={character}
         bellPulseTick={bellPulseTick}
@@ -115,7 +115,7 @@ export function ChatWindow({
 
       <div className="no-scrollbar flex-1 space-y-3 overflow-y-auto px-3 py-4">
         {timeline.length === 0 && (
-          <p className="mt-10 text-center text-sm text-neutral-400">
+          <p className="mt-10 text-center text-sm text-ink-soft">
             {character.emoji} {character.name}에게 말을 걸어보세요.
           </p>
         )}
@@ -142,21 +142,24 @@ export function ChatWindow({
 
       <form
         onSubmit={handleSubmit}
-        className="flex gap-2 border-t border-neutral-200 bg-white p-3"
+        className="flex items-end gap-2 border-t border-paper-sunken bg-paper px-4 py-3"
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={`${character.name}에게 메시지 보내기...`}
-          className="flex-1 rounded-full border border-neutral-300 px-4 py-2 text-sm outline-none focus:border-rose-400"
+          className="flex-1 border-b border-paper-sunken bg-transparent px-1 py-2 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft focus:border-seal"
           disabled={sending}
         />
         <button
           type="submit"
           disabled={sending || !input.trim()}
-          className="rounded-full bg-rose-500 px-5 py-2 text-sm font-medium text-white transition-colors disabled:opacity-40"
+          aria-label="전송"
+          className={`flex h-9 w-9 shrink-0 items-center justify-center text-xl transition-colors ${
+            input.trim() && !sending ? "text-seal" : "text-ink-soft/40"
+          }`}
         >
-          {sending ? "..." : "전송"}
+          {sending ? "···" : "↑"}
         </button>
       </form>
     </div>
