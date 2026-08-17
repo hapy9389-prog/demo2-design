@@ -62,9 +62,29 @@ export function StoryScreen({
   const bottomRef = useRef<HTMLDivElement>(null);
   // 사용자가 스크롤 바닥 근처(120px 이내)에 있는지 계속 추적한다. 과거 내용을 읽으려고
   // 위로 스크롤해 둔 상태라면(false), 새 턴이 추가돼도 강제로 맨 아래까지 끌어내리지
-  // 않는다. 기본값 true — 최초 로드 시에는 맨 아래(최신 지점)로 이동하는 게 자연스럽다.
+  // 않는다. messages.length effect는 응답이 이미 추가된 "이후"에 실행되므로, 그 안에서
+  // 직접 실시간으로 측정하면 늘어난 콘텐츠 기준으로 계산돼 "보내기 직전엔 바닥
+  // 근처였다"는 사실을 놓친다 — 그래서 이 ref는 "응답이 오기 직전" 시점의 위치를
+  // 기억해두는 용도로 쓴다.
   const isNearBottomRef = useRef(true);
   const hasScrolledOnceRef = useRef(false);
+
+  const measureIsNearBottom = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return true; // 콘텐츠가 없으면 기본 true(최초 마운트 안전장치)
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+  }, []);
+
+  // 사용자가 실제로 스크롤할 때마다 ref를 최신 상태로 유지한다.
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      isNearBottomRef.current = measureIsNearBottom();
+    };
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [measureIsNearBottom]);
 
   useEffect(() => {
     let cancelled = false;
@@ -87,33 +107,31 @@ export function StoryScreen({
   }, [sessionId]);
 
   useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const handleScroll = () => {
-      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-      isNearBottomRef.current = distanceFromBottom < 120;
-    };
-    el.addEventListener("scroll", handleScroll, { passive: true });
-    return () => el.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
     if (messages.length === 0) return;
     if (!isNearBottomRef.current) return; // 과거 내용을 읽는 중이면 스크롤 위치를 건드리지 않는다
     bottomRef.current?.scrollIntoView({
       behavior: hasScrolledOnceRef.current ? "smooth" : "auto",
+      block: "end",
     });
     hasScrolledOnceRef.current = true;
   }, [messages.length]);
 
   // Processing Indicator는 messages 배열에 포함되지 않으므로 위 effect가 반응하지
-  // 않는다 — sending이 false→true가 되는 순간에만(문구 전환마다는 X) 한 번, 기존과
-  // 동일한 near-bottom 가드를 적용해 스크롤한다. 과거 내용을 읽던 중이면 건드리지 않는다.
+  // 않는다 — sending이 false→true가 되는 순간에만(문구 전환마다는 X) 한 번 실행된다.
+  // 이 시점은 콘텐츠가 늘어나기 "직전"이라 캐시된 ref 대신 그 순간의 실제 위치를 직접
+  // 측정한다 — 오프닝 씬이 화면보다 길어서 사용자가 스크롤을 한 번도 하지 않은 채(입력창은
+  // 항상 하단에 고정 노출돼 스크롤 없이도 접근 가능) 첫 메시지를 보내는 경우에도 항상
+  // 정확하다. 동시에 이 측정값으로 ref를 갱신해서, 뒤이어 응답이 도착했을 때(messages.length
+  // effect)도 "보내기 직전 위치" 기준으로 정확히 판단할 수 있게 한다 — 과거에는 scroll
+  // 이벤트가 한 번도 안 일어난 상태에서 ref의 초기값(true)이 그대로 남아 "맨 위에 있는데
+  // 바닥 근처"로 잘못 판단해 첫 메시지 전송 시 화면이 맨 아래로 튕기는 버그가 있었다.
   useEffect(() => {
     if (!sending) return;
-    if (!isNearBottomRef.current) return;
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [sending]);
+    const nearBottom = measureIsNearBottom();
+    isNearBottomRef.current = nearBottom;
+    if (!nearBottom) return;
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [sending, measureIsNearBottom]);
 
   const handleSend = useCallback(async () => {
     const text = input.trim();

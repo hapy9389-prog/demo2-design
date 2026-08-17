@@ -63,66 +63,76 @@ export function GuestInvitePanel({
         onClick={onClose}
         className="absolute inset-0 animate-fade-in bg-black/30"
       />
-      {/* Story 본문의 dark cinematic 톤과 의도적으로 분리한다 — Memory/Reminder 패널과
-         같은 밝은 paper 유틸리티 시트로, "지금은 이야기 밖으로 나와 설정을 바꾸는
-         중"이라는 신호를 준다. */}
-      <div className="relative z-10 flex max-h-[70%] animate-sheet-up flex-col rounded-t-3xl bg-paper shadow-2xl">
-        <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-paper-sunken" />
-        <div className="flex items-center justify-between border-b border-paper-sunken px-4 py-3">
-          <h2 className="text-sm font-semibold text-ink">
-            {currentGuest ? "게스트 캐릭터" : "캐릭터 초대"}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label="닫기"
-            className="text-ink-soft hover:text-ink"
-          >
-            ✕
-          </button>
-        </div>
+      {/* Story 본문의 dark cinematic 톤과 완전히 분리하지 않는다 — bg-paper 유틸리티
+         시트는 유지하되("지금은 이야기 밖으로 나와 설정을 바꾸는 중"이라는 구분은
+         남기고), story 톤이 아주 옅게 스며드는 워시를 얹어 Story 화면과의 연결감을
+         준다. 장식(워시)은 `absolute inset-0 pointer-events-none`으로 깔고 실제
+         콘텐츠는 `relative z-10`으로 그 위에 명시적으로 올려서, DOM 순서나 암묵적
+         stacking 규칙에 기대지 않고 항상 콘텐츠가 워시 위에 오도록 한다. */}
+      <div className="relative z-10 flex max-h-[70%] animate-sheet-up flex-col overflow-hidden rounded-t-3xl bg-paper shadow-2xl">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-story-bg/10 via-transparent to-transparent"
+        />
 
-        {error && (
-          <p className="px-4 pt-2 text-xs text-red-500">{error}</p>
-        )}
-
-        {currentGuest ? (
-          <div className="flex flex-col items-center gap-3 p-6">
-            <Avatar character={currentGuest} size="xl" />
-            <div className="text-center">
-              <p className="font-semibold text-ink">{currentGuest.name}</p>
-              <p className="text-xs text-ink-soft">{currentGuest.tagline}</p>
-            </div>
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+          <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-story-bg/15" />
+          <div className="flex items-center justify-between border-b border-story-bg/10 bg-story-bg/5 px-4 py-3">
+            <h2 className="text-sm font-semibold text-ink">
+              {currentGuest ? "게스트 캐릭터" : "캐릭터 초대"}
+            </h2>
             <button
-              onClick={handleRemove}
-              disabled={pending}
-              className="mt-1 text-xs font-medium text-ink-soft hover:text-red-500 disabled:opacity-50"
+              onClick={onClose}
+              aria-label="닫기"
+              className="text-ink-soft hover:text-ink"
             >
-              {pending ? "제거하는 중..." : "제거하기"}
+              ✕
             </button>
-            <p className="text-center text-[11px] text-ink-soft">
-              다른 캐릭터로 바꾸려면 먼저 제거한 뒤 다시 초대해주세요.
-            </p>
           </div>
-        ) : (
-          <div className="no-scrollbar flex-1 divide-y divide-paper-sunken overflow-y-auto p-3">
-            {CHARACTERS.map((character) => (
+
+          {error && (
+            <p className="px-4 pt-2 text-xs text-red-500">{error}</p>
+          )}
+
+          {currentGuest ? (
+            <div className="flex flex-col items-center gap-3 p-6">
+              <Avatar character={currentGuest} size="xl" />
+              <div className="text-center">
+                <p className="font-semibold text-ink">{currentGuest.name}</p>
+                <p className="text-xs text-ink-soft">{currentGuest.tagline}</p>
+              </div>
               <button
-                key={character.id}
-                onClick={() => handleInvite(character.id)}
+                onClick={handleRemove}
                 disabled={pending}
-                className="flex w-full items-center gap-3 py-2.5 text-left transition-opacity hover:opacity-70 disabled:opacity-50"
+                className="mt-1 text-xs font-medium text-ink-soft hover:text-red-500 disabled:opacity-50"
               >
-                <Avatar character={character} size="md" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-ink">
-                    {character.name}
-                  </p>
-                  <p className="truncate text-xs text-ink-soft">{character.tagline}</p>
-                </div>
+                {pending ? "제거하는 중..." : "제거하기"}
               </button>
-            ))}
-          </div>
-        )}
+              <p className="text-center text-[11px] text-ink-soft">
+                다른 캐릭터로 바꾸려면 먼저 제거한 뒤 다시 초대해주세요.
+              </p>
+            </div>
+          ) : (
+            <div className="no-scrollbar flex-1 divide-y divide-story-bg/10 overflow-y-auto p-3">
+              {CHARACTERS.map((character) => (
+                <button
+                  key={character.id}
+                  onClick={() => handleInvite(character.id)}
+                  disabled={pending}
+                  className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-story-bg/5 disabled:opacity-50"
+                >
+                  <Avatar character={character} size="md" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-ink">
+                      {character.name}
+                    </p>
+                    <p className="truncate text-xs text-ink-soft">{character.tagline}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
